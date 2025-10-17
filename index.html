@@ -1,203 +1,735 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>TeknoFusion — Website Canggih</title>
-  <link rel="icon" href="data:;base64,iVBORw0KGgo=" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <title>Desain Rumah 3D Interaktif - Ekspor/Impor</title>
+
+  <link rel="stylesheet" href="style.css" />
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.159.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.159.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.159.0/examples/js/controls/TransformControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.159.0/examples/js/exporters/GLTFExporter.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 <body>
-  <header class="nav">
-    <div class="brand">Tekno<span>Fusion</span></div>
-    <nav class="nav-links">
-      <a href="#features">Fitur</a>
-      <a href="#demo">Demo</a>
-      <a href="#about">Tentang</a>
-      <a href="#contact">Kontak</a>
-    </nav>
-    <div class="controls">
-      <button id="themeToggle" aria-label="Toggle dark mode">🌙</button>
-    </div>
-  </header>
+  <div class="app">
+    <aside class="sidebar">
+      <h2>Desain Rumah 3D — Kontrol</h2>
 
-  <main>
-    <section class="hero" id="home">
-      <div class="hero-content">
-        <h1>Website canggih — penuh teknologi terbaru</h1>
-        <p>Menggabungkan WebGL, animasi CSS modern, design system yang responsif, dan interaksi realtime kecil tanpa backend.</p>
-        <div class="cta">
-          <a class="btn" href="#demo">Coba Demo</a>
-          <a class="btn ghost" href="#features">Lihat Fitur</a>
-        </div>
+      <div class="section">
+        <label>Skala dasar (meter)</label>
+        <input id="scaleMeters" type="number" min="0.1" step="0.1" value="4" />
+        <label>Skala cm (0-99)</label>
+        <input id="scaleCm" type="number" min="0" max="99" value="0" />
+        <div class="small">Total: <span id="scaleTotal">4.00 m</span></div>
       </div>
 
-      <div class="hero-canvas">
-        <canvas id="glCanvas"></canvas>
+      <div class="section">
+        <div class="btn" id="btnAddWall">➕ Tambah Dinding</div>
+        <div class="btn" id="btnAddLine">➕ Garis Denah</div>
+        <div class="btn" id="btnAddWindow">➕ Tambah Jendela</div>
+        <div class="btn" id="btnAddDoor">➕ Tambah Pintu</div>
+        <div class="btn" id="btnAddRoof">➕ Tambah Atap</div>
       </div>
-    </section>
 
-    <section id="features" class="features">
-      <h2>Fitur Utama</h2>
-      <div class="grid">
-        <article class="card">
-          <h3>WebGL Interactive</h3>
-          <p>Visual 3D interaktif (Three.js) - rotasi, zoom, dan efek wireframe/particles.</p>
-        </article>
-        <article class="card">
-          <h3>Dark Mode & Prefers-Color-Scheme</h3>
-          <p>Otomatis mengikuti preferensi sistem, plus tombol toggle manual.</p>
-        </article>
-        <article class="card">
-          <h3>Design System</h3>
-          <p>Variabel CSS, token warna, dan komponen yang bisa dipakai ulang.</p>
-        </article>
-        <article class="card">
-          <h3>Animasi Halus</h3>
-          <p>Transition, transform, dan micro-interactions untuk pengalaman modern.</p>
-        </article>
+      <div class="section">
+        <label>Tambah Furnitur</label>
+        <select id="furnitureSelect">
+          <option value="sofa">Sofa</option>
+          <option value="table">Meja</option>
+          <option value="chair">Kursi</option>
+          <option value="plant">Tanaman</option>
+        </select>
+        <div class="btn" id="btnAddFurniture">➕ Tambah Furnitur</div>
       </div>
-    </section>
 
-    <section id="demo" class="demo">
-      <h2>Demo Interaktif</h2>
-      <p>Gunakan mouse (atau sentuh) untuk memutar objek 3D. Tekan tombol di bawah untuk mengubah mode render.</p>
-      <div class="demo-controls">
-        <button id="toggleMode">Ubah Mode</button>
-        <button id="screenshot">Ambil Screenshot</button>
+      <div class="section">
+        <div class="btn" id="btnDelete">🗑 Hapus Objek Terpilih</div>
+        <div class="btn" id="btnToggleHolo">🟦 Aktifkan Hologram</div>
       </div>
-    </section>
 
-    <section id="about" class="about">
-      <h2>Tentang Proyek</h2>
-      <p>Template ini dibuat sebagai starting point — ringan, modern, dan mudah dikustomisasi. Cocok untuk portofolio teknis, landing page produk teknologi, atau presentasi proyek R&D.</p>
-    </section>
+      <div class="section">
+        <div class="btn" id="btnScreenshot">📸 Simpan Screenshot</div>
+      </div>
 
-    <section id="contact" class="contact">
-      <h2>Kontak</h2>
-      <form class="contact-form" onsubmit="return false;">
-        <label>
-          Nama
-          <input type="text" name="name" placeholder="Nama Anda" />
-        </label>
-        <label>
-          Email
-          <input type="email" name="email" placeholder="email@contoh.com" />
-        </label>
-        <label>
-          Pesan
-          <textarea name="message" rows="4" placeholder="Tulis pesan..."></textarea>
-        </label>
-        <div class="form-actions">
-          <button class="btn" onclick="alert('Form ini demo — tambahkan backend untuk kirim pesan')">Kirim</button>
-        </div>
-      </form>
-    </section>
-  </main>
+      <div class="section">
+        <div class="btn" id="btnExportJson">🧩 Ekspor Proyek (.json)</div>
+        <div class="btn" id="btnImportJson">📂 Impor Proyek (.json)</div>
+        <input type="file" id="fileInput" accept=".json" style="display:none" />
+        <div class="btn" id="btnExportGlb">🏗️ Ekspor 3D (.glb)</div>
+      </div>
 
-  <footer class="footer">
-    <div>© <span id="year"></span> Premium Desain— Built with modern web tech</div>
-  </footer>
+      <div class="section small-info">
+        <h3>Objek Terpilih</h3>
+        <div>Nama: <span id="selName">-</span></div>
+        <div>Dimensi: <span id="selDims">-</span></div>
+        <div>Posisi: <span id="selPos">-</span></div>
+        <div class="small">Instruksi: Klik tombol fungsi, lalu klik di area 3D untuk menempatkan / buat dinding dengan 2 klik.</div>
+      </div>
+    </aside>
 
-  <script src="https://unpkg.com/three@0.154.0/build/three.min.js"></script>
-  <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
+    <main class="viewer" id="viewer"></main>
+  </div>
 
-    const themeToggle = document.getElementById('themeToggle');
-    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const saved = localStorage.getItem('site-theme');
-    if (!saved) document.documentElement.classList.toggle('dark', prefersDark);
-    else document.documentElement.classList.toggle('dark', saved === 'dark');
+  <footer class="footer">Made with ❤️ — Desain Rumah 3D Interaktif</footer>
 
-    themeToggle.addEventListener('click', () => {
-      const isDark = document.documentElement.classList.toggle('dark');
-      localStorage.setItem('site-theme', isDark ? 'dark' : 'light');
-      themeToggle.textContent = isDark ? '☀️' : '🌙';
-    });
-
-    const canvas = document.getElementById('glCanvas');
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
-    camera.position.z = 45;
-
-    function onResize() {
-      const rect = canvas.getBoundingClientRect();
-      renderer.setSize(rect.width, rect.height);
-      camera.aspect = rect.width / rect.height;
-      camera.updateProjectionMatrix();
-    }
-
-    const particles = new THREE.BufferGeometry();
-    const count = 1200;
-    const positions = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      const phi = Math.acos(2 * Math.random() - 1);
-      const theta = 2 * Math.PI * Math.random();
-      const r = 15 + Math.random() * 6;
-      positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-      positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-      positions[i * 3 + 2] = r * Math.cos(phi);
-    }
-    particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    const material = new THREE.PointsMaterial({ size: 0.22, transparent: true });
-    const points = new THREE.Points(particles, material);
-    scene.add(points);
-
-    const wire = new THREE.LineSegments(
-      new THREE.WireframeGeometry(new THREE.SphereGeometry(16, 32, 32)),
-      new THREE.LineBasicMaterial({ opacity: 0.15, transparent: true })
-    );
-    scene.add(wire);
+<script>
     
-    let rot = 0;
-    function animate() {
-      rot += 0.0025;
-      points.rotation.y = rot * 0.9;
-      wire.rotation.y = -rot * 0.6;
-      renderer.render(scene, camera);
-      requestAnimationFrame(animate);
-    }
+const container = document.getElementById('viewer');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x081225);
 
-    function fitCanvas() {
-      onResize();
-    }
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(container.clientWidth, container.clientHeight);
+renderer.shadowMap.enabled = true;
+container.appendChild(renderer.domElement);
 
-    window.addEventListener('resize', onResize);
-    setTimeout(() => { fitCanvas(); animate(); }, 50);
+const camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 2000);
+camera.position.set(8, 6, 8);
 
-    let pointerX = 0, pointerY = 0;
-    function onPointer(e) {
-      const x = (e.clientX || e.touches?.[0]?.clientX || window.innerWidth / 2) - window.innerWidth / 2;
-      const y = (e.clientY || e.touches?.[0]?.clientY || window.innerHeight / 2) - window.innerHeight / 2;
-      pointerX = x / window.innerWidth * 2;
-      pointerY = y / window.innerHeight * 2;
-      points.rotation.x = pointerY * 0.3;
-      points.rotation.y = rot + pointerX * 0.6;
-    }
-    window.addEventListener('pointermove', onPointer);
-    window.addEventListener('touchmove', onPointer);
+const orbit = new THREE.OrbitControls(camera, renderer.domElement);
+orbit.target.set(0, 0.8, 0);
+orbit.update();
 
-    const toggleBtn = document.getElementById('toggleMode');
-    let mode = 0;
-    toggleBtn.addEventListener('click', () => {
-      mode = (mode + 1) % 3;
-      if (mode === 0) material.size = 0.22;
-      if (mode === 1) material.size = 0.6;
-      if (mode === 2) material.size = 0.02;
+const grid = new THREE.GridHelper(40, 40, 0x444444, 0x222222);
+grid.position.y = 0;
+scene.add(grid);
+
+const groundMat = new THREE.MeshStandardMaterial({ color: 0x111827, metalness: 0.1, roughness: 0.9 });
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(200,200), groundMat);
+ground.rotation.x = -Math.PI/2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+const ambient = new THREE.AmbientLight(0xffffff, 0.45);
+scene.add(ambient);
+const dir = new THREE.DirectionalLight(0xffffff, 0.9);
+dir.position.set(5, 12, 7);
+dir.castShadow = true;
+dir.shadow.camera.left = -10;
+dir.shadow.camera.right = 10;
+dir.shadow.camera.top = 10;
+dir.shadow.camera.bottom = -10;
+scene.add(dir);
+
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+const houseGroup = new THREE.Group();
+scene.add(houseGroup);
+
+const wallsGroup = new THREE.Group();
+houseGroup.add(wallsGroup);
+
+const transformControls = new THREE.TransformControls(camera, renderer.domElement);
+transformControls.setSize(0.9);
+transformControls.addEventListener('dragging-changed', function (event) {
+  orbit.enabled = !event.value;
+});
+scene.add(transformControls);
+
+let selectedObject = null;
+function selectObject(obj) {
+  if (selectedObject === obj) return;
+  selectedObject = obj;
+  if (obj) transformControls.attach(obj);
+  else transformControls.detach();
+  updateSelectedInfo();
+}
+function updateSelectedInfo() {
+  const nameEl = document.getElementById('selName');
+  const dimsEl = document.getElementById('selDims');
+  const posEl = document.getElementById('selPos');
+  if (!selectedObject) {
+    nameEl.textContent = '-';
+    dimsEl.textContent = '-';
+    posEl.textContent = '-';
+    return;
+  }
+  nameEl.textContent = selectedObject.userData.type || selectedObject.name || 'Objek';
+  const box = new THREE.Box3().setFromObject(selectedObject);
+  const size = new THREE.Vector3();
+  box.getSize(size);
+  const m1 = size.x.toFixed(2), m2 = size.y.toFixed(2), m3 = size.z.toFixed(2);
+  dimsEl.textContent = `${m1} m × ${m2} m × ${m3} m`;
+  posEl.textContent = `${selectedObject.position.x.toFixed(2)}, ${selectedObject.position.y.toFixed(2)}, ${selectedObject.position.z.toFixed(2)} m`;
+}
+
+function getTotalScaleMeters() {
+  const m = parseFloat(document.getElementById('scaleMeters').value) || 0;
+  const c = parseFloat(document.getElementById('scaleCm').value) || 0;
+  const total = m + (c / 100);
+  document.getElementById('scaleTotal').textContent = total.toFixed(2) + ' m';
+  return total;
+}
+document.getElementById('scaleMeters').addEventListener('input', () => {
+  const s = getTotalScaleMeters();
+  houseGroup.scale.setScalar(s / 4);
+});
+document.getElementById('scaleCm').addEventListener('input', () => {
+  const val = parseInt(document.getElementById('scaleCm').value) || 0;
+  if (val >= 100) {
+    document.getElementById('scaleCm').value = val % 100;
+  }
+  getTotalScaleMeters();
+});
+getTotalScaleMeters();
+
+function createWallMesh(start, end, height = 1.8, thickness = 0.12, color = 0xe6e6e6, givenName = null) {
+  const dx = end.x - start.x;
+  const dz = end.z - start.z;
+  const length = Math.sqrt(dx*dx + dz*dz);
+  const midX = (start.x + end.x) / 2;
+  const midZ = (start.z + end.z) / 2;
+  const geom = new THREE.BoxGeometry(length, height, thickness);
+  const mat = new THREE.MeshStandardMaterial({ color, side: THREE.DoubleSide });
+  const mesh = new THREE.Mesh(geom, mat);
+  mesh.position.set(midX, height/2, midZ);
+  const angle = Math.atan2(dz, dx);
+  mesh.rotation.y = -angle;
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  mesh.userData = { type: 'Wall', length, height, thickness };
+  mesh.name = givenName || `Wall_${Date.now()}`;
+  wallsGroup.add(mesh);
+  return mesh;
+}
+
+function createWindowOnWall(wall, width = 0.9, height = 0.8, sill = 1.0, givenName = null) {
+  const winGeo = new THREE.BoxGeometry(width, height, 0.02);
+  const winMat = new THREE.MeshStandardMaterial({ color: 0x9dd9ff, transparent: true, opacity: 0.7 });
+  const win = new THREE.Mesh(winGeo, winMat);
+  const localX = 0;
+  const localZ = (wall.geometry.parameters.depth / 2) + 0.011;
+  const localY = sill - (height/2);
+  wall.add(win);
+  win.position.set(localX, localY, localZ);
+  win.userData = { type: 'Window', parentWall: wall.name, width, height, sill };
+  win.name = givenName || `Window_${Date.now()}`;
+  return win;
+}
+
+function createDoorOnWall(wall, width = 0.9, height = 1.9, givenName = null) {
+  const doorGeo = new THREE.BoxGeometry(width, height, 0.05);
+  const doorMat = new THREE.MeshStandardMaterial({ color: 0x3e2723 });
+  const door = new THREE.Mesh(doorGeo, doorMat);
+  const localX = 0;
+  const localZ = (wall.geometry.parameters.depth / 2) + 0.025;
+  const localY = height/2 - 0.01;
+  wall.add(door);
+  door.position.set(localX, localY, localZ);
+  door.userData = { type: 'Door', parentWall: wall.name, width, height };
+  door.name = givenName || `Door_${Date.now()}`;
+  return door;
+}
+
+function createRoof(overGroup, givenName = null) {
+  const roofGeo = new THREE.BoxGeometry(4.5, 0.2, 4.5);
+  const roofMat = new THREE.MeshStandardMaterial({ color: 0xb85f3c });
+  const roof = new THREE.Mesh(roofGeo, roofMat);
+  roof.position.y = 2.2;
+  roof.rotation.z = Math.PI / 8;
+  roof.userData = { type: 'Roof' };
+  roof.name = givenName || `Roof_${Date.now()}`;
+  overGroup.add(roof);
+  return roof;
+}
+
+function createFurniture(type, givenName = null) {
+  let mesh;
+  if (type === 'sofa') {
+    const g = new THREE.BoxGeometry(1.4, 0.4, 0.7);
+    mesh = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: 0x8b0000 }));
+    mesh.position.y = 0.2;
+  } else if (type === 'table') {
+    const g = new THREE.BoxGeometry(1.0, 0.08, 0.6);
+    mesh = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: 0x6b4f2a }));
+    mesh.position.y = 0.55;
+  } else if (type === 'chair') {
+    const g = new THREE.BoxGeometry(0.45, 0.45, 0.45);
+    mesh = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: 0x3e3e3e }));
+    mesh.position.y = 0.225;
+  } else if (type === 'plant') {
+    const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.2,0.4,12), new THREE.MeshStandardMaterial({ color: 0x5b3a29 }));
+    const leaves = new THREE.Mesh(new THREE.ConeGeometry(0.4,0.8,8), new THREE.MeshStandardMaterial({ color: 0x00ff7f }));
+    leaves.position.y = 0.6;
+    const g = new THREE.Group();
+    g.add(pot); g.add(leaves);
+    mesh = g;
+    mesh.position.y = 0.2;
+  }
+  mesh.userData = { type: 'Furniture', subtype: type };
+  mesh.name = givenName || `${type}_${Date.now()}`;
+  scene.add(mesh);
+  return mesh;
+}
+
+let mode = null; 
+let tempPoints = [];
+
+function setMode(newMode) {
+  mode = newMode;
+  tempPoints = [];
+  renderer.domElement.style.cursor = (mode ? 'crosshair' : 'default');
+}
+
+document.getElementById('btnAddWall').addEventListener('click', () => setMode('wall'));
+document.getElementById('btnAddLine').addEventListener('click', () => setMode('line'));
+document.getElementById('btnAddWindow').addEventListener('click', () => setMode('window'));
+document.getElementById('btnAddDoor').addEventListener('click', () => setMode('door'));
+document.getElementById('btnAddRoof').addEventListener('click', () => { setMode(null); createRoof(houseGroup); });
+document.getElementById('btnAddFurniture').addEventListener('click', () => {
+  const val = document.getElementById('furnitureSelect').value;
+  const f = createFurniture(val);
+  f.position.set(0, 0, 0);
+  selectObject(f);
+});
+document.getElementById('btnDelete').addEventListener('click', () => {
+  if (!selectedObject) return;
+  transformControls.detach();
+  if (selectedObject.parent) selectedObject.parent.remove(selectedObject);
+  selectedObject = null;
+  updateSelectedInfo();
+});
+
+let hologram = false;
+document.getElementById('btnToggleHolo').addEventListener('click', (e) => {
+  hologram = !hologram;
+  if (hologram) {
+    scene.traverse(o => {
+      if (o.isMesh) {
+        o.userData._oldMat = o.material;
+        o.material = o.material.clone();
+        o.material.color = new THREE.Color(0x00ffff);
+        o.material.transparent = true;
+        o.material.opacity = 0.85;
+        o.material.emissive = new THREE.Color(0x003344);
+        o.material.metalness = 0.6;
+      }
     });
-
-  document.getElementById('screenshot').addEventListener('click', () => {
-      try {
-        const data = renderer.domElement.toDataURL('image/png');
-        const a = document.createElement('a');
-        a.href = data;
-        a.download = 'screenshot.png';
-        a.click();
-      } catch (e) { alert('Tidak dapat mengambil screenshot di browser ini'); }
+    document.getElementById('btnToggleHolo').textContent = '🟦 Matikan Hologram';
+  } else {
+    scene.traverse(o => {
+      if (o.isMesh && o.userData._oldMat) {
+        o.material = o.userData._oldMat;
+        delete o.userData._oldMat;
+      }
     });
+    document.getElementById('btnToggleHolo').textContent = '🟦 Aktifkan Hologram';
+  }
+});
 
-  </script>
+document.getElementById('btnScreenshot').addEventListener('click', () => {
+  html2canvas(container, { backgroundColor: null, scale: 2 }).then(canvas => {
+    const link = document.createElement('a');
+    link.download = 'desain-rumah.png';
+    link.href = canvas.toDataURL();
+    link.click();
+  });
+});
+
+function getMouseWorldPoint(clientX, clientY) {
+  const rect = renderer.domElement.getBoundingClientRect();
+  const x = ((clientX - rect.left) / rect.width) * 2 - 1;
+  const y = -((clientY - rect.top) / rect.height) * 2 + 1;
+  mouse.set(x, y);
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster.intersectObject(ground);
+  if (intersects.length > 0) {
+    return intersects[0].point.clone();
+  }
+  return null;
+}
+
+let previewLine = null;
+function updatePreviewLine(p1, p2) {
+  if (previewLine) scene.remove(previewLine);
+  const pts = [p1, p2];
+  const g = new THREE.BufferGeometry().setFromPoints(pts);
+  const material = new THREE.LineDashedMaterial({ color: 0x00ffcc, dashSize: 0.15, gapSize: 0.08, linewidth: 2 });
+  const line = new THREE.Line(g, material);
+  line.computeLineDistances();
+  previewLine = line;
+  scene.add(previewLine);
+}
+
+renderer.domElement.addEventListener('pointerdown', (ev) => {
+  const pt = getMouseWorldPoint(ev.clientX, ev.clientY);
+  if (!pt) return;
+  if (!mode) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    mouse.x = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((ev.clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(scene.children, true);
+    const found = intersects.find(i => i.object !== ground && i.object !== previewLine && i.object !== grid);
+    if (found) {
+      let obj = found.object;
+      while (obj.parent && obj.parent.type !== "Scene") {
+        if (obj.userData && obj.userData.type) break;
+        obj = obj.parent;
+      }
+      selectObject(obj);
+    } else {
+      selectObject(null);
+    }
+    return;
+  }
+
+  if (mode === 'wall' || mode === 'line') {
+    tempPoints.push(pt);
+    if (tempPoints.length === 2) {
+      const a = tempPoints[0], b = tempPoints[1];
+      if (mode === 'wall') {
+        const w = createWallMesh(a, b);
+        selectObject(w);
+      } else {
+        const geo = new THREE.BufferGeometry().setFromPoints([a,b]);
+        const mat = new THREE.LineBasicMaterial({ color: 0xffd166 });
+        const ln = new THREE.Line(geo, mat);
+        ln.userData = { type: 'PlanLine' };
+        ln.name = `Line_${Date.now()}`;
+        scene.add(ln);
+        selectObject(ln);
+      }
+      tempPoints = [];
+      if (previewLine) { scene.remove(previewLine); previewLine = null; }
+      setMode(null);
+    } else {
+      const markGeo = new THREE.SphereGeometry(0.05, 8,8);
+      const markMat = new THREE.MeshStandardMaterial({ color: 0xffcc00 });
+      const mark = new THREE.Mesh(markGeo, markMat);
+      mark.position.copy(pt);
+      mark.name = `Mark_${Date.now()}`;
+      scene.add(mark);
+      setTimeout(()=> { if (mark.parent) scene.remove(mark); }, 4000);
+    }
+    return;
+  }
+
+  if (mode === 'window' || mode === 'door') {
+    const rect = renderer.domElement.getBoundingClientRect();
+    mouse.x = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((ev.clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+    const wallIntersects = raycaster.intersectObjects(wallsGroup.children, true);
+    if (wallIntersects.length > 0) {
+      const hit = wallIntersects[0];
+      const wall = hit.object;
+      if (mode === 'window') {
+        const win = createWindowOnWall(wall);
+        selectObject(win);
+      } else {
+        const door = createDoorOnWall(wall);
+        selectObject(door);
+      }
+      setMode(null);
+    } else {
+      flashMessage('Arahkan ke dinding untuk menempatkan jendela/pintu');
+    }
+    return;
+  }
+});
+
+renderer.domElement.addEventListener('pointermove', (ev) => {
+  if (!mode) return;
+  const pt = getMouseWorldPoint(ev.clientX, ev.clientY);
+  if (!pt) return;
+  if (tempPoints.length === 1) {
+    updatePreviewLine(tempPoints[0], pt);
+  }
+});
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    setMode(null);
+    if (previewLine) { scene.remove(previewLine); previewLine = null; }
+    tempPoints = [];
+  }
+  if (!selectedObject) return;
+  if (e.key.toLowerCase() === 'r') transformControls.setMode('rotate');
+  if (e.key.toLowerCase() === 't') transformControls.setMode('translate');
+  if (e.key.toLowerCase() === 's') transformControls.setMode('scale');
+});
+
+function flashMessage(msg) {
+  const el = document.createElement('div');
+  el.className = 'flash';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(()=> el.classList.add('visible'), 20);
+  setTimeout(()=> { el.classList.remove('visible'); setTimeout(()=> el.remove(),400); }, 2200);
+}
+
+
+function downloadFile(dataStr, filename, mime='application/json') {
+  const blob = new Blob([dataStr], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function buildProjectJSON() {
+  const objs = [];
+  houseGroup.traverse(obj => {
+    if (obj === houseGroup) return;
+    if (obj === wallsGroup) return;
+    if (obj.userData && obj.userData.type) {
+      const parentName = obj.parent && obj.parent !== scene && obj.parent.name ? obj.parent.name : null;
+      const entry = {
+        name: obj.name || null,
+        type: obj.userData.type || null,
+        subtype: obj.userData.subtype || null,
+        parentName: parentName,
+        position: obj.position.toArray(),
+        rotation: [obj.rotation.x, obj.rotation.y, obj.rotation.z],
+        scale: obj.scale.toArray(),
+        userData: obj.userData || {},
+        geom: {}
+      };
+      if (obj.userData.type === 'Wall') {
+        entry.geom.length = obj.userData.length;
+        entry.geom.height = obj.userData.height;
+        entry.geom.thickness = obj.userData.thickness;
+        const box = new THREE.Box3().setFromObject(obj);
+        const size = new THREE.Vector3(); box.getSize(size);
+        entry.geom.worldSize = size.toArray();
+      }
+      if (obj.userData.type === 'Window' || obj.userData.type === 'Door') {
+        entry.geom.width = obj.userData.width || null;
+        entry.geom.height = obj.userData.height || null;
+        entry.geom.sill = obj.userData.sill || null;
+      }
+      if (obj.userData.type === 'Furniture') {
+        entry.geom.subtype = obj.userData.subtype || null;
+      }
+      objs.push(entry);
+    }
+  });
+
+  scene.traverse(obj => {
+    if ((obj.userData && obj.userData.type) && !houseGroup.children.includes(obj) && obj.parent !== houseGroup) {
+      if (!objs.find(o => o.name === obj.name)) {
+        objs.push({
+          name: obj.name || null,
+          type: obj.userData.type || null,
+          subtype: obj.userData.subtype || null,
+          parentName: obj.parent && obj.parent.name ? obj.parent.name : null,
+          position: obj.position.toArray(),
+          rotation: [obj.rotation.x, obj.rotation.y, obj.rotation.z],
+          scale: obj.scale.toArray(),
+          userData: obj.userData || {},
+          geom: {}
+        });
+      }
+    }
+  });
+
+  const doc = {
+    meta: {
+      exportedAt: new Date().toISOString(),
+      scaleBaseMeters: getTotalScaleMeters()
+    },
+    objects: objs
+  };
+  return JSON.stringify(doc, null, 2);
+}
+
+document.getElementById('btnExportJson').addEventListener('click', () => {
+  const json = buildProjectJSON();
+  downloadFile(json, 'desain-rumah-proyek.json', 'application/json');
+});
+
+const fileInput = document.getElementById('fileInput');
+document.getElementById('btnImportJson').addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', (ev) => {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const obj = JSON.parse(e.target.result);
+      loadProjectFromJSON(obj);
+      flashMessage('Proyek berhasil diimpor');
+    } catch (err) {
+      flashMessage('File JSON tidak valid');
+      console.error(err);
+    }
+  };
+  reader.readAsText(file);
+});
+
+function clearHouseGroup() {
+  houseGroup.clear();
+  const ng = new THREE.Group();
+  houseGroup.add(ng);
+  while (wallsGroup.children.length) wallsGroup.remove(wallsGroup.children[0]);
+  while (houseGroup.children.length) {
+    houseGroup.remove(houseGroup.children[0]);
+  }
+  wallsGroup.children.length = 0;
+  houseGroup.add(wallsGroup);
+}
+
+function loadProjectFromJSON(doc) {
+  if (!doc || !doc.objects) { flashMessage('JSON tidak sesuai'); return; }
+  const toRemove = [];
+  scene.traverse(obj => {
+    if (obj.userData && obj.userData.type) {
+      toRemove.push(obj);
+    }
+  });
+  toRemove.forEach(o => { if (o.parent) o.parent.remove(o); });
+
+  const wallEntries = doc.objects.filter(o => o.type === 'Wall');
+  const otherEntries = doc.objects.filter(o => o.type !== 'Wall');
+
+  const createdMap = {};
+
+  wallEntries.forEach(w => {
+    const length = w.geom.length || (w.geom.worldSize ? w.geom.worldSize[0] : 4);
+    const height = w.geom.height || 1.8;
+    const thickness = w.geom.thickness || 0.12;
+    const wall = createWallMesh(new THREE.Vector3(0,0,0), new THREE.Vector3(length,0,0), height, thickness, 0xe6e6e6, w.name);
+    wall.position.fromArray(w.position);
+    wall.rotation.set(w.rotation[0], w.rotation[1], w.rotation[2]);
+    wall.scale.fromArray(w.scale || [1,1,1]);
+    createdMap[w.name] = wall;
+  });
+
+  otherEntries.forEach(o => {
+    if (o.type === 'Window' || o.type === 'Door') {
+      const parent = o.parentName && createdMap[o.parentName] ? createdMap[o.parentName] : null;
+      if (parent) {
+        if (o.type === 'Window') {
+          const win = createWindowOnWall(parent, o.geom.width || 0.9, o.geom.height || 0.8, o.geom.sill || 1.0, o.name);
+          if (o.position) {
+            win.position.fromArray(o.position);
+          }
+          win.rotation.set(o.rotation[0], o.rotation[1], o.rotation[2]);
+          win.scale.fromArray(o.scale || [1,1,1]);
+          createdMap[o.name] = win;
+        } else {
+          const door = createDoorOnWall(parent, o.geom.width || 0.9, o.geom.height || 1.9, o.name);
+          if (o.position) door.position.fromArray(o.position);
+          door.rotation.set(o.rotation[0], o.rotation[1], o.rotation[2]);
+          door.scale.fromArray(o.scale || [1,1,1]);
+          createdMap[o.name] = door;
+        }
+      } else {
+        if (o.type === 'Window') {
+          const winGeo = new THREE.BoxGeometry(o.geom.width || 0.9, o.geom.height || 0.8, 0.02);
+          const winMat = new THREE.MeshStandardMaterial({ color: 0x9dd9ff, transparent:true, opacity:0.7 });
+          const win = new THREE.Mesh(winGeo, winMat);
+          win.position.fromArray(o.position || [0,0,0]);
+          win.rotation.set(o.rotation[0], o.rotation[1], o.rotation[2]);
+          win.scale.fromArray(o.scale || [1,1,1]);
+          win.userData = { type: 'Window' };
+          win.name = o.name || `Window_${Date.now()}`;
+          scene.add(win);
+          createdMap[win.name] = win;
+        } else {
+          const doorGeo = new THREE.BoxGeometry(o.geom.width || 0.9, o.geom.height || 1.9, 0.05);
+          const doorMat = new THREE.MeshStandardMaterial({ color: 0x3e2723 });
+          const door = new THREE.Mesh(doorGeo, doorMat);
+          door.position.fromArray(o.position || [0,0,0]);
+          door.rotation.set(o.rotation[0], o.rotation[1], o.rotation[2]);
+          door.scale.fromArray(o.scale || [1,1,1]);
+          door.userData = { type: 'Door' };
+          door.name = o.name || `Door_${Date.now()}`;
+          scene.add(door);
+          createdMap[door.name] = door;
+        }
+      }
+    } else if (o.type === 'Furniture') {
+      const f = createFurniture(o.geom.subtype || o.subtype || 'sofa', o.name);
+      f.position.fromArray(o.position || [0,0,0]);
+      f.rotation.set(o.rotation[0], o.rotation[1], o.rotation[2]);
+      f.scale.fromArray(o.scale || [1,1,1]);
+      createdMap[o.name] = f;
+    } else if (o.type === 'PlanLine') {
+      const pts = [ new THREE.Vector3(o.position[0], o.position[1], o.position[2]), new THREE.Vector3(o.position[0]+1, o.position[1], o.position[2]) ];
+      const geo = new THREE.BufferGeometry().setFromPoints(pts);
+      const mat = new THREE.LineBasicMaterial({ color: 0xffd166 });
+      const ln = new THREE.Line(geo, mat);
+      ln.position.fromArray(o.position || [0,0,0]);
+      ln.rotation.set(o.rotation[0], o.rotation[1], o.rotation[2]);
+      ln.scale.fromArray(o.scale || [1,1,1]);
+      ln.userData = { type: 'PlanLine' };
+      ln.name = o.name || `Line_${Date.now()}`;
+      scene.add(ln);
+      createdMap[ln.name] = ln;
+    } else if (o.type === 'Roof') {
+      const roof = createRoof(houseGroup, o.name);
+      roof.position.fromArray(o.position || [0,0,0]);
+      roof.rotation.set(o.rotation[0], o.rotation[1], o.rotation[2]);
+      roof.scale.fromArray(o.scale || [1,1,1]);
+      createdMap[o.name] = roof;
+    }
+  });
+
+  flashMessage('Proyek dimuat. Periksa scene.');
+}
+
+document.getElementById('btnExportGlb').addEventListener('click', () => {
+  const exporter = new THREE.GLTFExporter();
+  exporter.parse(houseGroup, function(result) {
+    let output;
+    if (result instanceof ArrayBuffer) {
+      output = result;
+      const blob = new Blob([output], { type: 'application/octet-stream' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'desain-rumah.glb';
+      a.click();
+      URL.revokeObjectURL(url);
+    } else {
+      output = JSON.stringify(result, null, 2);
+      downloadFile(output, 'desain-rumah.gltf', 'model/gltf+json');
+    }
+  }, { binary: true });
+});
+
+(function createSampleHouse() {
+  const p1 = new THREE.Vector3(-2, 0, -2);
+  const p2 = new THREE.Vector3(2, 0, -2);
+  const p3 = new THREE.Vector3(2, 0, 2);
+  const p4 = new THREE.Vector3(-2, 0, 2);
+  createWallMesh(p1, p2);
+  createWallMesh(p2, p3);
+  createWallMesh(p3, p4);
+  createWallMesh(p4, p1);
+  createDoorOnWall(wallsGroup.children[0], 0.9, 1.9);
+  createWindowOnWall(wallsGroup.children[1], 0.9, 0.8, 1.0);
+  const s = createFurniture('sofa'); s.position.set(0.8, 0, -0.8);
+  const t = createFurniture('table'); t.position.set(0,0,0.2);
+  const c = createFurniture('chair'); c.position.set(-0.8,0,0.2);
+})();
+
+transformControls.addEventListener('objectChange', () => {
+  updateSelectedInfo();
+});
+
+window.addEventListener('resize', () => {
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  camera.aspect = container.clientWidth / container.clientHeight;
+  camera.updateProjectionMatrix();
+});
+
+function animate() {
+  requestAnimationFrame(animate);
+  renderer.render(scene, camera);
+}
+animate();
+
+</script>
 </body>
-        </html>
+</html>
